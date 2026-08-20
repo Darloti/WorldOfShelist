@@ -6,6 +6,7 @@ Dieses Dokument ist ein Arbeitsgeruest. Die Ueberschriften definieren moegliche 
 
 ### Weltzustand
 ### Entitaeten und stabile IDs
+### Namespaced-IDs und Runtime-ID-Woerterbuch
 ### Komponenten und Aggregate
 ### Beziehungen und Referenzen
 ### Koordinaten, Regionen und Chunks
@@ -22,6 +23,8 @@ Dieses Dokument ist ein Arbeitsgeruest. Die Ueberschriften definieren moegliche 
 ### Tags, Kategorien und Abhaengigkeiten
 ### Modding und Erweiterungspunkte
 ### Balancing und Konfigurationsprofile
+
+### Core-Mod und generische Engine-Vertraege
 
 ## 3. Weltgenerierung
 

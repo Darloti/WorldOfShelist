@@ -6,10 +6,87 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 
 - Projektvision und Systeminventar etablieren.
 - Rust-Konventionen, Teststrategie und deterministische RNG-Strategie festlegen.
-- Cargo-Workspace erst einfuehren, wenn mindestens zwei fachliche Bibliotheken unabhaengig getestet werden koennen.
+- Cargo-Workspace frueh einfuehren, sobald die erste fachliche Crate-Grenze
+  sinnvoll umgesetzt wird; die Aufteilung soll nicht bis zu einer spaeten
+  Wachstums- oder Stabilitaetsschwelle aufgeschoben werden.
 - Zeitmodell, ID-Strategie, Koordinatenmodell und Persistenzversion definieren.
 
 **Exit-Kriterium:** Ein minimaler Kern kann einen Seed und einen Tick-Typ darstellen und wird durch automatisierte Tests abgesichert.
+
+### Phase-0-Checkliste
+
+#### A. Projektgrundlagen
+
+- [x] Projektname und sichtbarer Spieletitel dokumentieren: `WorldOfShelist` und `World of Shelist`
+- [x] Rust-Version, Edition und minimale Build-Anforderungen festlegen
+- [x] Formatierungs-, Lint- und Testbefehle verbindlich festlegen
+- [x] Verzeichnis- und Modulkonventionen fuer das aktuelle Starter-Crate dokumentieren
+- [x] Entscheidungskriterium fuer die spaetere Aufteilung in Cargo-Crates festlegen
+
+#### B. Fachliche Kernbegriffe
+
+- [ ] Definition von Welt, Weltzustand und Weltkonfiguration festlegen
+- [ ] Zentrale Entitaeten und ihre Lebensdauer erfassen
+- [ ] Typisierte IDs fuer Welt, Region, Chunk, Entitaet und Event definieren
+- [ ] Beziehungen zwischen Entitaeten als eigenes Konzept beschreiben
+- [ ] Koordinaten- und Regionsmodell fuer die erste kleine Welt festlegen
+- [ ] Einheiten und Mengen definieren, zum Beispiel Nahrung, Gewicht und Entfernung
+
+#### C. Zeit und Determinismus
+
+- [ ] Erste Zeiteinheit und Bedeutung eines Simulations-Ticks festlegen
+- [ ] Regeln fuer Tick-Fortschritt, Pause und Einzelschritt definieren
+- [ ] Welt-Seed als Teil der Weltkonfiguration modellieren
+- [ ] Benannte RNG-Stroeme und ihre Verantwortlichkeiten festlegen
+- [ ] Verhalten bei gleicher Konfiguration, gleichem Seed und gleichen Eingaben definieren
+- [ ] Verhalten bei unterschiedlichen Seeds als Testfall festlegen
+
+#### D. Zustandsaenderungen und Ereignisse
+
+- [ ] Unterschied zwischen Command, validierter Zustandsaenderung und Event dokumentieren
+- [ ] Erste Commands fuer die Kernsimulation benennen
+- [ ] Erste fachliche Events und ihre Pflichtdaten definieren
+- [ ] Event-ID, Tick, Ursache und betroffene Entitaeten festlegen
+- [ ] Validierungs- und Fehlerstrategie fuer ungueltige Commands festlegen
+- [ ] Reihenfolge und Verantwortlichkeit des ersten Simulations-Orchestrators definieren
+
+#### E. Daten und Persistenz
+
+- [ ] Trennung zwischen Definitionen, Instanzen und Laufzeitstatus festlegen
+- [ ] Erstes Datenformat fuer Debug- und Testdaten auswaehlen
+- [ ] Save-Struktur mit Formatversion, Seed, Zeit und Weltzustand skizzieren
+- [ ] Strategie fuer Save-Migrationen und inkompatible Daten festlegen
+- [ ] Entscheidung treffen, welche Events dauerhaft gespeichert werden
+- [ ] Minimalen Serialize-/Deserialize-Test vorbereiten
+
+#### F. Qualitaet und Beobachtbarkeit
+
+- [ ] Kerninvarianten der Welt als Testfaelle formulieren
+- [ ] Determinismus-Test mit identischen Eingaben erstellen
+- [ ] Tick-Fortschritts- und Grenzfalltests erstellen
+- [ ] Test fuer ungueltige Konfiguration oder Daten erstellen
+- [ ] Debug-Ausgabe fuer Seed, Tick und erzeugte Events definieren
+- [ ] Fehlerdarstellung fuer Entwickler und spaetere Logs festlegen
+
+#### G. Implementierung des Minimal-Kerns
+
+- [ ] `WorldSeed` implementieren
+- [ ] `Tick` und grundlegendes Zeitmodell implementieren
+- [ ] erste typisierte IDs implementieren
+- [ ] minimale `World`- und `WorldConfig`-Strukturen implementieren
+- [ ] deterministischen RNG-Wrapper implementieren
+- [ ] minimale Event- und Command-Typen implementieren
+- [ ] ersten Orchestrator mit einem kontrollierten Tick implementieren
+- [ ] Tests fuer alle bisher festgelegten Invarianten implementieren
+
+#### H. Abschluss von Phase 0
+
+- [ ] `cargo fmt --check` erfolgreich ausfuehren
+- [ ] `cargo check` erfolgreich ausfuehren
+- [ ] `cargo test` erfolgreich ausfuehren
+- [ ] Architekturentscheidungen und offene Fragen dokumentieren
+- [ ] Phase-0-Exit-Kriterium anhand eines kleinen Testfalls nachweisen
+- [ ] Entscheidung fuer Phase 1: Weltkern erweitern oder zuerst Workspace aufteilen
 
 ## Phase 1: Deterministischer Weltkern
 
