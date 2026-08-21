@@ -226,6 +226,14 @@ und Beziehungen erhalten bleiben.
 
 ### Ereignisse und Beziehungen
 
+Wenn in der Projektdokumentation von einem `Event` oder einem Ereignis die
+Rede ist, ist damit grundsaetzlich ein historisches, fachliches Ereignis der
+Welt gemeint. Technische Vorgaenge wie Ticks, Command-Eingang,
+Systemausfuehrungen oder Debug-Meldungen sind keine Events im fachlichen Sinn
+und werden ausdruecklich als technische Metadaten beziehungsweise
+Protokolleintraege bezeichnet.
+eintraege bezeichnet.
+
 Events existieren fortlaufend als append-only Weltgeschichte. Ein Event ist
 eine unveraenderliche historische Wahrheit und darf nach seiner Annahme nicht
 inhaltlich ueberschrieben werden. Events koennen je nach Eventtyp die damals
@@ -249,6 +257,57 @@ Ein `Command` ist eine Eingabe oder angeforderte Aktion und noch kein Teil der
 Weltgeschichte. Erst ein validierter und angewendeter Zustandswechsel erzeugt
 ein unveraenderliches fachliches Event. Abgelehnte Commands koennen fuer
 Diagnose und Logs aufgezeichnet werden, sind aber keine historischen Events.
+
+### Commands, validierte Zustandsaenderungen und Events
+
+Ein Command beschreibt ausschliesslich eine Absicht. Er enthaelt die
+angeforderte Aktion und ihren Eingabekontext, veraendert den Weltzustand aber
+nicht direkt. Die ersten Commands der Kernsimulation sind:
+
+- `AdvanceSimulation`: einen oder mehrere Ticks beziehungsweise bis zu einer
+  Zielzeit fortschreiten
+- `PauseSimulation`: die Verarbeitung weiterer Fortschritts-Commands pausieren
+- `StepSimulation`: genau einen Tick verarbeiten und danach pausiert bleiben
+
+Die fachliche Validierung wird nicht ausschliesslich im Orchestrator gebuendelt.
+Entitaeten und fachliche Teilbereiche stellen geeignete Validatoren fuer ihre
+eigenen Regeln bereit. Der Orchestrator prueft zusaetzlich den Command-Kontext,
+ordnet die Validatoren und Systeme in definierter Reihenfolge an, stellt die
+atomare Anwendung sicher und sammelt die resultierenden Events. Ein Command ist
+nur dann erfolgreich, wenn alle relevanten Validierungen bestanden wurden.
+
+Eine validierte Zustandsaenderung ist das Ergebnis eines erfolgreich geprueften
+Commands und wird innerhalb des kontrollierten Orchestrator-Schritts auf den
+Weltzustand angewendet. Sie ist keine historische Tatsache, solange sie nicht
+erfolgreich angewendet wurde. Eine erfolgreiche Zustandsaenderung erzeugt ein
+fachliches Event, wenn sie historisch relevant ist; rein technische oder
+wirkungslos angenommene Commands erzeugen kein historisches Event.
+
+Ein Event ist ein festgeschriebenes, vergangenes fachliches Ereignis und Teil
+der append-only Weltgeschichte. Es wird nach seiner Annahme nicht inhaltlich
+geaendert. Die ersten historischen Eventtypen sind `CreatureSlain`,
+`KingdomFounded` und `HistoricalFigureBorn`. Ihre zusaetzlichen Pflichtdaten
+sind mindestens:
+
+- `CreatureSlain`: getoetete Kreatur und Ort des Todes
+- `KingdomFounded`: gegruendetes Koenigreich und Gruendungsort
+- `HistoricalFigureBorn`: geborene historische Figur und Geburtsort
+
+Jedes historische Event enthaelt mindestens eine eigene `EventId`, den
+Eventtyp, einen exakten Zeitpunkt der Weltzeit, die Ursache, die betroffenen
+Entitaeten und die fuer den Eventtyp definierten Ereignisdaten. Die Ursache unterscheidet mindestens
+Weltgenerierung, autonome Simulation, Spieler, System beziehungsweise
+Orchestrator und Mod.
+
+Ein Simulations-Tick ist kein historisches Event und wird nicht als allgemeines
+Pflichtfeld des Event-Inhalts behandelt. Ein historisches Event kann optional
+den erzeugenden Tick als technische Metadaten referenzieren, damit Debugging
+und Replay den Ausfuehrungskontext nachvollziehen koennen. Ein Tick kann
+mehrere historische Events erzeugen oder kein historisches Event erzeugen.
+
+Abgelehnte Commands veraendern den Weltzustand nicht und erzeugen kein
+fachliches Event. Sie werden ausschliesslich im Debug-Protokoll mit ihrem
+Fehler erfasst; im normalen historischen Event-Log erscheinen sie nicht.
 
 Eine `LocalMap` beschreibt einen detaillierten Ausschnitt der Oberwelt und
 bleibt an dessen Region gebunden. Eine `Instance` beschreibt dagegen einen
@@ -526,7 +585,38 @@ protokollieren.
 ### Globale, regionale und lokale Detailstufen
 ### Zeitfortschritt, Pause und Beschleunigung
 ### Commands und Validierung
+
+Commands werden am Orchestrator entgegengenommen und in stabiler Reihenfolge
+verarbeitet. Die Verarbeitung eines Commands folgt im ersten Orchestrator
+dieser Reihenfolge:
+
+1. Command aus der Eingangsqueue nehmen
+2. Command-Kontext pruefen
+3. Validatoren der betroffenen Entitaeten und Fachbereiche aufrufen
+4. Zustandsaenderungen vorbereiten
+5. Zustandsaenderungen atomar anwenden
+6. daraus entstandene historische Events erzeugen
+7. historische Events in stabiler Reihenfolge an das Event-Log uebergeben
+8. technische Debug- und Ausfuehrungsdaten protokollieren
+
+Fachliche Validatoren pruefen ihre jeweiligen Invarianten; der Orchestrator
+prueft den gemeinsamen Kontext, koordiniert die Reihenfolge und verwirft den
+gesamten Zustandswechsel, falls eine Validierung fehlschlaegt. Die
+Fehlerdarstellung verwendet stabile fachliche Fehlercodes. Abgelehnte Commands
+werden nur fuer Debugging protokolliert und nicht als historische Events
+gespeichert. Ein formal gueltiger, aber wirkungsloser Command, etwa das
+Pausieren einer bereits pausierten Simulation, aendert den Zustand nicht und
+erzeugt ebenfalls kein historisches Event.
+
 ### Events, Eventtypen und Event-Log
+
+Das Event-Log enthaelt ausschliesslich erfolgreich angewendete, unveraenderliche
+fachliche Ereignisse. Der Orchestrator vergibt Event-IDs, stellt Weltzeit,
+Ursache und betroffene Entitaeten sicher und fuehrt Events in einer
+deterministischen Reihenfolge. Die ersten Eventtypen sind `CreatureSlain`,
+`KingdomFounded` und `HistoricalFigureBorn`; ihre ereignisspezifischen Daten
+werden gemeinsam mit dem jeweiligen Eventtyp definiert. Ein reiner
+Command-Eingang, ein Tick oder eine Ablehnung ist kein historisches Event.
 ### Event-Abonnenten und Reaktionen
 ### Determinismus und Replay
 

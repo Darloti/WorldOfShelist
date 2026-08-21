@@ -43,12 +43,12 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 
 #### D. Zustandsaenderungen und Ereignisse
 
-- [ ] Unterschied zwischen Command, validierter Zustandsaenderung und Event dokumentieren
-- [ ] Erste Commands fuer die Kernsimulation benennen
-- [ ] Erste fachliche Events und ihre Pflichtdaten definieren
-- [ ] Event-ID, Tick, Ursache und betroffene Entitaeten festlegen
-- [ ] Validierungs- und Fehlerstrategie fuer ungueltige Commands festlegen
-- [ ] Reihenfolge und Verantwortlichkeit des ersten Simulations-Orchestrators definieren
+- [x] Unterschied zwischen Command, validierter Zustandsaenderung und Event dokumentieren
+- [x] Erste Commands fuer die Kernsimulation benennen
+- [x] Erste fachliche Events und ihre Pflichtdaten definieren
+- [x] Event-ID, Tick, Ursache und betroffene Entitaeten festlegen
+- [x] Validierungs- und Fehlerstrategie fuer ungueltige Commands festlegen
+- [x] Reihenfolge und Verantwortlichkeit des ersten Simulations-Orchestrators definieren
 
 #### E. Daten und Persistenz
 

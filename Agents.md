@@ -40,12 +40,16 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
    ob die Aenderung tatsaechlich erfolgen soll. Ohne ausdrueckliche Zustimmung
    keinen Code und keinen Content anlegen oder aendern.
 1. Vor einer Aenderung relevante Dokumentation und bestehende Module lesen.
-2. Die kleinste fachlich vollstaendige Aenderung umsetzen.
-3. Neue Regeln zuerst in reinen Rust-Tests pruefen; Macroquad nur fuer Integrations- oder Darstellungstests verwenden.
-4. Bei jeder Simulationserweiterung Seed, Tick, erzeugte Events und relevante Zustandsaenderungen sichtbar machen.
-5. Dokumentation aktualisieren, wenn Architektur, Datenvertrag oder Roadmap betroffen sind.
-6. `cargo fmt --check`, `cargo check` und passende `cargo test` ausfuehren. Bei grafikbezogenen Aenderungen zusaetzlich manuell starten.
-7. Bei Auflistungen von Entscheidungen, Fragen oder ToDos nummerierte Punkte im
+2. ToDo- und Checklistenpunkte duerfen erst abgehakt werden, wenn sie wirklich
+   vollstaendig abgeschlossen, fachlich geprueft und falls erforderlich
+   dokumentiert sind. Teilfortschritte bleiben offen und werden als solche
+   benannt.
+3. Die kleinste fachlich vollstaendige Aenderung umsetzen.
+4. Neue Regeln zuerst in reinen Rust-Tests pruefen; Macroquad nur fuer Integrations- oder Darstellungstests verwenden.
+5. Bei jeder Simulationserweiterung Seed, Tick, erzeugte Events und relevante Zustandsaenderungen sichtbar machen.
+6. Dokumentation aktualisieren, wenn Architektur, Datenvertrag oder Roadmap betroffen sind.
+7. `cargo fmt --check`, `cargo check` und passende `cargo test` ausfuehren. Bei grafikbezogenen Aenderungen zusaetzlich manuell starten.
+8. Bei Auflistungen von Entscheidungen, Fragen oder ToDos nummerierte Punkte im
    Format `1.`, `2.`, `3.` verwenden, damit der Nutzer direkt auf einzelne
    Punkte Bezug nehmen kann.
 
