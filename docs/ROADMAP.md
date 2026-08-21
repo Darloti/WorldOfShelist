@@ -34,12 +34,12 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 
 #### C. Zeit und Determinismus
 
-- [ ] Erste Zeiteinheit und Bedeutung eines Simulations-Ticks festlegen
-- [ ] Regeln fuer Tick-Fortschritt, Pause und Einzelschritt definieren
-- [ ] Welt-Seed als Teil der Weltkonfiguration modellieren
-- [ ] Benannte RNG-Stroeme und ihre Verantwortlichkeiten festlegen
-- [ ] Verhalten bei gleicher Konfiguration, gleichem Seed und gleichen Eingaben definieren
-- [ ] Verhalten bei unterschiedlichen Seeds als Testfall festlegen
+- [x] Erste Zeiteinheit und Bedeutung eines Simulations-Ticks festlegen
+- [x] Regeln fuer Tick-Fortschritt, Pause und Einzelschritt definieren
+- [x] Welt-Seed als Teil der Weltkonfiguration modellieren
+- [x] Benannte RNG-Stroeme und ihre Verantwortlichkeiten festlegen
+- [x] Verhalten bei gleicher Konfiguration, gleichem Seed und gleichen Eingaben definieren
+- [x] Verhalten bei unterschiedlichen Seeds als Testfall festlegen
 
 #### D. Zustandsaenderungen und Ereignisse
 

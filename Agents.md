@@ -45,6 +45,9 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
 4. Bei jeder Simulationserweiterung Seed, Tick, erzeugte Events und relevante Zustandsaenderungen sichtbar machen.
 5. Dokumentation aktualisieren, wenn Architektur, Datenvertrag oder Roadmap betroffen sind.
 6. `cargo fmt --check`, `cargo check` und passende `cargo test` ausfuehren. Bei grafikbezogenen Aenderungen zusaetzlich manuell starten.
+7. Bei Auflistungen von Entscheidungen, Fragen oder ToDos nummerierte Punkte im
+   Format `1.`, `2.`, `3.` verwenden, damit der Nutzer direkt auf einzelne
+   Punkte Bezug nehmen kann.
 
 ## Qualitaetskriterien
 

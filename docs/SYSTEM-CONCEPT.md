@@ -355,6 +355,62 @@ Zellen beziehungsweise Bereiche. An Weltgrenzen werden Nachbarn nicht
 umgebrochen; ausserhalb der rechteckigen Welt existiert keine Koordinate.
 
 ### Zeit, Kalender und Zeitskalen
+
+Die kanonische Weltzeit wird als nichtnegative Anzahl von Sekunden seit der
+Welterzeugung gefuehrt. Der Startzeitpunkt ist Tag 1, Monat 1, Jahr 1 bei
+Weltzeit `0`. Ein Tag hat 24 Stunden, eine Stunde 60 Minuten und eine Minute
+60 Sekunden.
+
+Der Kalender umfasst zehn normale Monate mit jeweils 20 Tagen sowie einen
+elften Sondermonat mit drei Tagen. Ein Jahr hat damit 203 Tage oder
+`17.539.200` Sekunden. Der Sondermonat ist als eigener Kalenderabschnitt
+erkennbar und kann spaeter besondere Gefahren, Spawnregeln und Events
+aktivieren. Diese Regeln gehoeren nicht zur grundlegenden Zeitrepraesentation.
+
+Ein Simulations-Tick ist ein expliziter, kontrollierter Fortschrittsschritt,
+in dem die zustaendigen Systeme in definierter Reihenfolge ausgefuehrt werden.
+Ein Tick ist kein zusaetzlicher Zeittyp; er besitzt eine Dauer und verschiebt
+die gemeinsame Weltzeit um diesen Betrag. Die Tick-Dauer darf vom
+Simulationskontext abhaengen: Auf Koenigreichsebene kann ein Tick einen Tag,
+auf Siedlungsebene eine Stunde und im Roguelike-Modus die Dauer einer
+konkreten Aktion repraesentieren. Unterschiedliche Detailstufen verwenden
+damit unterschiedlich grosse Fortschrittsschritte, erzeugen aber keine eigene
+Zeitlogik und keine parallele Weltzeit.
+
+Im Siedlungsmodus entsprechen zehn Echtzeitsekunden einer Ingame-Stunde. Ein
+Siedlungstag dauert damit 240 Echtzeitsekunden. Im Koenigreichmodus entsprechen
+zehn Echtzeitsekunden einem Ingame-Tag. Ein normaler Monat dauert 200
+Echtzeitsekunden, der Sondermonat 30 Echtzeitsekunden und ein Jahr 2030
+Echtzeitsekunden.
+
+Im Roguelike-Modus sind Ticks aktionsbasiert. Die Bewegung von einem Tile zum
+naechsten, ein Angriff und eine Interaktion wie das Faellen eines Baumes haben
+jeweils eine eigene, aus Aktion, Geschwindigkeit, Zustand und Umgebung
+deterministisch berechnete Dauer. Eine Aktion kann dadurch Sekunden oder
+mehrere Minuten Weltzeit verbrauchen. Schnellreisen werden als Folge normaler
+Reise- oder Bewegungsaktionen simuliert und nicht als unkontrollierter direkter
+Zeitsprung behandelt.
+
+Echtzeit in einem Spielmodus beschreibt die Bedienung und Darstellung, nicht
+eine Kopplung an die Render-Framerate. Die Simulation bleibt explizit
+tickbasiert und kann pausiert, beschleunigt oder im Einzelschritt ausgefuehrt
+werden. Als Geschwindigkeiten sind mindestens `0.25x`, `0.5x`, `1x`, `2x`,
+`10x`, `100x` und `maximum` vorgesehen. Bei einer Ueberlastung wird die
+Simulation langsamer; es werden keine Ticks uebersprungen.
+
+Ein Fortschrittsbefehl kann einen einzelnen Tick, mehrere Ticks oder die
+Simulation bis zu einer Zielzeit anfordern. Jeder Tick wird vollstaendig
+abgeschlossen, bevor der naechste beginnt. Eine Pause und ein Moduswechsel
+werden an einer Tick-Grenze wirksam. Ein Einzelschritt verarbeitet genau einen
+Tick und laesst die Simulation anschliessend pausiert. Commands waehrend einer
+Pause werden angenommen und in stabiler Reihenfolge vorgemerkt.
+
+Ein Tick beginnt bei einer bestimmten Weltzeit und endet bei der Weltzeit nach
+seinem Fortschritt. Zustandsaenderungen werden innerhalb dieses kontrollierten
+Schritts angewendet. Events erhalten neben ihrem Tick-Kontext einen exakten
+Zeitpunkt in der Weltzeit; eine stabile Reihenfolge fuer Events mit gleicher
+Weltzeit wird spaeter als Teil des Orchestrators festgelegt. Zeit wird je nach
+Kontext in Jahren, Monaten, Tagen, Stunden, Minuten und Sekunden dargestellt.
 ### Einheiten und Mengen
 
 Mengen werden intern als nichtnegative Ganzzahlen in ihrer kleinsten
@@ -402,6 +458,56 @@ dafuer ein konkreter fachlicher Bedarf entsteht.
 ## 3. Weltgenerierung
 
 ### Seed- und Zufallsstrategie
+
+Der Welt-Seed ist Bestandteil der Weltkonfiguration und wird intern als
+`u64` gespeichert. Jeder `u64`-Wert ist gueltig, einschliesslich `0`.
+
+Eine Welt kann entweder mit einem numerischen Seed oder mit einem frei
+eingegebenen Text-Seed erzeugt werden. Text-Seeds werden deterministisch und
+plattformunabhaengig in einen `u64`-Wert umgewandelt. Der eingegebene Text wird
+zusaetzlich unveraendert in der Weltkonfiguration gespeichert, damit er in
+Saves, Logs und Debug-Ausgaben nachvollziehbar und teilbar bleibt. Der
+numerische Seed wird ebenfalls immer gespeichert und angezeigt; bei einem
+Text-Seed wird der Originaltext zusaetzlich angezeigt.
+
+Wird kein Seed angegeben, erzeugt das System einen automatisch bestimmten
+`u64`-Seed. Automatisch erzeugte Seeds besitzen keinen Text-Seed und werden
+ausschliesslich numerisch gespeichert und angezeigt.
+
+Eine Aenderung des Seeds erzeugt eine neue Welt. Die Kombination aus
+Weltkonfiguration und numerischem Seed muss ausreichen, um die Welterzeugung
+reproduzierbar zu wiederholen. Die verwendete Umwandlung von Text in `u64`
+muss deshalb als stabiler, versionierter und plattformunabhaengiger Vertrag
+behandelt werden.
+
+Zufallsentscheidungen verwenden benannte und voneinander unabhaengige
+RNG-Stroeme. Fuer den ersten Kernumfang werden die fachlichen Stroeme
+`system:rng:worldgen`, `system:rng:weather`, `system:rng:population`,
+`system:rng:events`, `system:rng:loot` und `system:rng:names` vorgesehen.
+Jeder Stream besitzt genau eine fachliche Verantwortlichkeit. Ein zusaetzlicher
+Zufallsaufruf in einem Stream darf die Ergebnisse anderer Streams nicht
+veraendern.
+
+Der Namespace `system` ist fuer engineinterne Zufallsentscheidungen reserviert.
+Mods duerfen keine `system:*`-ID definieren, ueberschreiben oder referenzieren.
+Fachliche Zufallsstroeme des Grundspiels verwenden den Namespace `core`, zum
+Beispiel `core:rng:worldgen`; Stroeme anderer Mods verwenden deren eigenen
+Namespace. Die Mod-Aufloesung weist unzulaessige Verwendung des reservierten
+`system`-Namespaces zurueck.
+
+Streams werden deterministisch aus Welt-Seed, vollstaendiger Stream-ID und
+einer versionierten RNG-Algorithmuskennung abgeleitet. Unterstreams duerfen
+spaeter aus einer Stream-ID und einem stabilen Kontext wie Region-ID,
+Entity-ID oder Event-ID abgeleitet werden. Unbekannte Streams werden nicht
+implizit erzeugt, sondern als Fehler behandelt.
+
+Fuer die erste Version wird kein globaler RNG-Zustand persistiert. Gleicher
+Seed, gleiche Konfiguration, gleiche Eingaben und gleiche Eventreihenfolge
+muessen dieselben Zufallsentscheidungen erzeugen. Die verwendeten Stream-IDs
+und die RNG-Algorithmusversion werden im Welt- beziehungsweise Save-Kontext
+nachvollziehbar festgehalten. Wichtige Zufallsentscheidungen sollen mit
+Stream-ID und Kontext debugbar sein, ohne jeden einzelnen Zufallswert zu
+protokollieren.
 ### Generator-Pipeline und Orchestrator
 ### Hoehen, Gelaende und Geologie
 ### Wasser, Fluesse, Seen und Kuesten
@@ -423,6 +529,55 @@ dafuer ein konkreter fachlicher Bedarf entsteht.
 ### Events, Eventtypen und Event-Log
 ### Event-Abonnenten und Reaktionen
 ### Determinismus und Replay
+
+Determinismus wird fachlich beziehungsweise semantisch bewertet. Bei gleicher
+Weltkonfiguration, gleichem Seed, gleichen Mod-Versionen, gleichen Commands,
+gleichen Eingabezeitpunkten und gleicher Eingabereihenfolge muessen mindestens
+der fachlich relevante Weltzustand, stabile IDs und historische Events
+identisch sein. Command- und Event-Reihenfolgen sind strikt deterministisch.
+
+Gleicher Seed und gleicher RNG-Kontext muessen plattformuebergreifend dieselben
+Zufallsentscheidungen liefern. Systemzeit, externe Zufallsquellen und
+unkontrollierte Thread- oder Ausfuehrungsreihenfolgen sind innerhalb der
+Simulation nicht zulaessig. Abgelehnte Commands und Fehler muessen mit
+demselben fachlichen Fehlercode und in derselben Reihenfolge reproduzierbar
+sein.
+
+Ein Determinismus-Test zaehlt Fortschrittsschritte des jeweiligen
+Simulationskontexts und nicht eine globale, einheitliche Tick-Dauer. Ein
+Siedlungsschritt entspricht einer Ingame-Stunde, ein Koenigreichsschritt einem
+Ingame-Tag und ein Roguelike-Schritt einer abgeschlossenen Aktion. Die Dauer
+eines Roguelike-Schritts ist aktionsabhaengig und kann beispielsweise bei
+Bewegung, Angriff oder Baumfaellen unterschiedlich ausfallen. Nach dem Test
+muss die Weltzeit der Summe aller verarbeiteten Schritt- beziehungsweise
+Aktionsdauern entsprechen.
+
+Der erste Testumfang umfasst mindestens 100 Fortschrittsschritte je Kontext
+sowie einen Langzeittest mit 1.000 Fortschrittsschritten. Zusaetzlich wird ein
+Save nach einer definierten Schrittzahl geladen und mit einem ununterbrochenen
+Lauf verglichen. Groessere und kleinere Schrittweiten duerfen nur dann als
+fachlich gleichwertig gelten, wenn im groesseren Schritt keine relevanten
+Zwischenereignisse oder historischen Zustandsaenderungen verloren gehen.
+Zeitraeume mit solchen Zwischenereignissen duerfen nicht unzulaessig
+zusammengefasst werden.
+
+Unterschiedliche Seeds werden mit identischer Weltkonfiguration verglichen.
+Nur der Seed darf sich zwischen den Testlaeufen aendern. Jeder unterschiedliche
+Seed muss nicht zwingend ein einzigartiges Ergebnis erzeugen; bei ausreichender
+Stichprobe muessen jedoch fachlich unterscheidbare Ergebnisse entstehen.
+
+Der Test verwendet mindestens die numerischen Seeds `0`, `1`, `885372` und
+`u64::MAX` sowie die Text-Seeds `world of shelist` und `the power of rng`.
+Getestet werden die Welterzeugung, 100 Fortschrittsschritte und 1.000
+Fortschrittsschritte in den Kontexten Weltgenerierung, Siedlung, Koenigreich
+und Roguelike. Verglichen werden alle fachlich relevanten Ergebnisse,
+insbesondere Weltzustand, stabile IDs, historische Events und relevante
+Zufallsauswirkungen.
+
+Jeder Testlauf muss trotz Seed-Unterschieden alle Welt-, ID- und Event-
+Invarianten einhalten. Festgestellte Unterschiede werden mit Seed,
+Simulationskontext, Testumfang, betroffenem Weltzustand und relevanten Events
+dokumentiert.
 ### Fehlerbehandlung und Wiederanlauf
 ### Performancebudgets und Profiling
 
