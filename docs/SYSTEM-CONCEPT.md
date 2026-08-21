@@ -264,6 +264,8 @@ Ein Command beschreibt ausschliesslich eine Absicht. Er enthaelt die
 angeforderte Aktion und ihren Eingabekontext, veraendert den Weltzustand aber
 nicht direkt. Die ersten Commands der Kernsimulation sind:
 
+- `InitializeRacePopulation`: die initialen Rassengruppen nach der
+  geografischen Welterzeugung auf der Welt verteilen
 - `AdvanceSimulation`: einen oder mehrere Ticks beziehungsweise bis zu einer
   Zielzeit fortschreiten
 - `PauseSimulation`: die Verarbeitung weiterer Fortschritts-Commands pausieren
@@ -285,13 +287,29 @@ wirkungslos angenommene Commands erzeugen kein historisches Event.
 
 Ein Event ist ein festgeschriebenes, vergangenes fachliches Ereignis und Teil
 der append-only Weltgeschichte. Es wird nach seiner Annahme nicht inhaltlich
-geaendert. Die ersten historischen Eventtypen sind `CreatureSlain`,
+geaendert. Der erste historische Eventtyp der initialen Welterzeugung ist
+`InitialRaceSpawn`. Weitere fruehe historische Eventtypen sind `CreatureSlain`,
 `KingdomFounded` und `HistoricalFigureBorn`. Ihre zusaetzlichen Pflichtdaten
 sind mindestens:
+
+- `InitialRaceSpawn`: Rasse, Gruppengroesse, initiale Weltposition und
+  Erzeugungskontext
 
 - `CreatureSlain`: getoetete Kreatur und Ort des Todes
 - `KingdomFounded`: gegruendetes Koenigreich und Gruendungsort
 - `HistoricalFigureBorn`: geborene historische Figur und Geburtsort
+
+`InitialRaceSpawn` ist ein wiederholbarer Eventtyp und tritt mindestens einmal
+pro Rasse auf. Die Rassen werden in Gruppen von jeweils 100 Individuen auf die
+Welt gesetzt. Die einzelnen Event-Instanzen erhalten jeweils eine eigene
+`EventId`; spaetere Siedlungs- und Zivilisationsgruendungen koennen auf diese
+Ereignisse und ihre betroffenen Entitaeten zurueckverweisen.
+
+`InitialRaceSpawn` entsteht nicht als impliziter Nebeneffekt der reinen
+Geografieerzeugung. Nach erfolgreicher geografischer Welterzeugung wird dafuer
+`InitializeRacePopulation` verarbeitet. Der Command wird validiert und atomar
+angewendet; erst danach werden die Rassengruppen als Weltzustand angelegt und
+die zugehoerigen historischen Events in deterministischer Reihenfolge erzeugt.
 
 Jedes historische Event enthaelt mindestens eine eigene `EventId`, den
 Eventtyp, einen exakten Zeitpunkt der Weltzeit, die Ursache, die betroffenen
@@ -472,10 +490,11 @@ Weltzeit wird spaeter als Teil des Orchestrators festgelegt. Zeit wird je nach
 Kontext in Jahren, Monaten, Tagen, Stunden, Minuten und Sekunden dargestellt.
 #### Phase-0-Spezifikation der Tick-Fortschritts- und Grenzfalltests
 
-Die Tests decken den Minimal-Kern, die Welterzeugung und alle vorgesehenen
-Simulationskontexte ab. Fuer jeden Kontext wird die jeweils fachlich gueltige
-Tick-Dauer verwendet; es gibt keine einheitliche Tick-Dauer fuer alle
-Simulationsebenen.
+Die Tests decken im ersten Umsetzungsschritt den Minimal-Kern und die
+Welterzeugung mit einem einzigen Simulationskontext ab. Dieser Kontext
+verwendet einen Tick von genau einem Tag. Spaetere Simulationskontexte erhalten
+eigene Tests und koennen fachlich andere Tick-Dauern verwenden; es gibt daher
+keine dauerhafte einheitliche Tick-Dauer fuer alle Simulationsebenen.
 
 Die Fortschrittstests decken alle vorgesehenen Operationen ab:
 
@@ -486,7 +505,7 @@ Die Fortschrittstests decken alle vorgesehenen Operationen ab:
 - Fortsetzen
 - Einzelschritt
 - Beschleunigung und Verlangsamung ueber die vorgesehenen Geschwindigkeiten
-- Fortschritt in jedem vorgesehenen Simulationskontext
+- Fortschritt im ersten Phase-1-Simulationskontext mit einem Tages-Tick
 
 Die Grenzfalltests decken mindestens folgende Situationen ab:
 
@@ -774,10 +793,12 @@ erzeugt ebenfalls kein historisches Event.
 Das Event-Log enthaelt ausschliesslich erfolgreich angewendete, unveraenderliche
 fachliche Ereignisse. Der Orchestrator vergibt Event-IDs, stellt Weltzeit,
 Ursache und betroffene Entitaeten sicher und fuehrt Events in einer
-deterministischen Reihenfolge. Die ersten Eventtypen sind `CreatureSlain`,
-`KingdomFounded` und `HistoricalFigureBorn`; ihre ereignisspezifischen Daten
-werden gemeinsam mit dem jeweiligen Eventtyp definiert. Ein reiner
-Command-Eingang, ein Tick oder eine Ablehnung ist kein historisches Event.
+deterministischen Reihenfolge. Der erste historische Eventtyp der initialen
+Welterzeugung ist `InitialRaceSpawn`; spaetere fruehe Eventtypen sind
+`CreatureSlain`, `KingdomFounded` und `HistoricalFigureBorn`. Ihre
+ereignisspezifischen Daten werden gemeinsam mit dem jeweiligen Eventtyp
+definiert. Ein reiner Command-Eingang, ein Tick oder eine Ablehnung ist kein
+historisches Event.
 ### Kerninvarianten des Phase-0-Kerns
 
 Die folgenden Invarianten begrenzen den ersten testbaren Kernumfang. Sie gelten
@@ -792,7 +813,8 @@ unabhaengig von spaeteren Regeln fuer Population, Ressourcen, Biome oder Kampf:
 - Ein Einzelschritt verarbeitet genau einen kontrollierten Tick.
 - Typisierte IDs sind nur in ihrem vorgesehenen fachlichen Kontext verwendbar.
 - IDs sind innerhalb ihres jeweiligen Gueltigkeitsbereichs eindeutig.
-- Events besitzen immer eine eindeutige Event-ID und einen gueltigen Tick.
+- Events besitzen immer eine eindeutige Event-ID und eine gueltige Weltzeit.
+  Ein optional gespeicherter Tick-Kontext muss gueltig sein.
 - Events enthalten Ursache und betroffene Entitaeten, sofern fachlich
   erforderlich.
 - Referenzen auf Entitaeten und Beziehungen zeigen nur auf gueltige oder
@@ -1168,11 +1190,12 @@ veraendern.
 
 ## 17. Offene Designfragen
 
-### Wie fein ist ein Tick in den jeweiligen Modi?
+Die folgenden Fragen sind fuer Phase 1 noch nicht entscheidend und bleiben
+bewusst offen:
+
 ### Welche Agenten werden voll und welche aggregiert simuliert?
-### Welche Ereignisse sind dauerhaft zu speichern?
 ### Ist die Welt endlich, unendlich oder streamingfaehig?
 ### Wie stark veraendert Magie Natur- und Gesellschaftsregeln?
 ### Welche Informationen darf der Spieler sehen?
 ### Welche Regeln muessen modifizierbar sein?
-### Welche technischen Grenzen gelten fuer die erste Zielplattform?
+### Welche technischen Grenzen gelten fuer spaetere Plattformen?

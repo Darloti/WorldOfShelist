@@ -177,6 +177,78 @@ Die Welt-Simulation ist der Kern. Rendering, Eingabe, Audio, UI und konkrete Spi
 
 Ein stabiler Kern aus IDs, Definitionen, Zustandsdaten, Commands, Events und Zeit ist wichtiger als eine rein technische Crate-Anzahl. Fachlich klar erkennbare Grenzen werden jedoch frueh als eigene Crates umgesetzt, damit die Trennung nicht auf eine spaetere, unbestimmte Phase verschoben wird. Ein Cargo-Workspace wird daher eingefuehrt, sobald die erste solche Crate-Grenze umgesetzt wird. Weitere Crates folgen, wenn sie fachliche Eigenstaendigkeit, Testbarkeit oder Wiederverwendbarkeit verbessern. Innerhalb jedes Crates arbeiten spezialisierte Module, deren Zusammenspiel ein Orchestrator mit klarer Reihenfolge und Fehlerbehandlung steuert.
 
+## Architekturentscheidungen fuer Phase 1
+
+Phase 1 beginnt als Cargo-Workspace mit den fachlichen Crates `world_core`,
+`world_data`, `worldgen`, `simulation` und `app`. Die Crates werden nur dort
+getrennt, wo eine fachliche Grenze, eigenstaendige Testbarkeit oder
+Wiederverwendbarkeit besteht.
+
+`world_core` bleibt adapterfrei und enthaelt die generischen Grundbegriffe des
+Weltmodells, insbesondere IDs, Zeit, Geometrie und Fehler. Die Verwaltung von
+Mods und Definitionen gehoert nicht in `world_core`.
+
+`world_data` laedt und validiert das `core-mod` sowie weitere Mods. Es prueft
+Abhaengigkeiten, Versionen und Datenvertraege, loest Mods deterministisch auf
+und bildet lesbare namespaced IDs auf kompakte Runtime-IDs ab. Ein eigener
+Mod-Crate ist fuer Phase 1 nicht erforderlich und bleibt eine spaetere Option,
+falls die Mod-Verwaltung eine eigenstaendige fachliche Grenze bildet.
+
+Die Daten fuer Phase 1 werden von Beginn an datengetrieben entwickelt. Die
+erste Iteration erzeugt zunaechst die Geografie der Welt. Weitere Definitionen
+und Laufzeitdaten werden anschliessend schrittweise ergaenzt.
+
+Der erste Simulations-Tick umfasst genau einen Tag. Die erste Persistenzstufe
+ist ein versionierter JSON-Snapshot.
+
+Das erste historische Ereignis ist `InitialRaceSpawn`. Der Eventtyp tritt
+mehrfach auf, mindestens einmal pro Rasse. Jede Rasse wird dabei in Gruppen von
+jeweils 100 Individuen an ihren initialen Weltpositionen angesiedelt. Die
+Ereignisse bilden den nachvollziehbaren Ausgangspunkt fuer spaetere
+Siedlungs- und Zivilisationsgruendungen.
+
+ECS, Multithreading, Streaming und vergleichbare technische Komplexitaet werden
+fuer Phase 1 nicht vorab entschieden. Sie werden erst bei einem nachgewiesenen
+Bedarf durch Messungen erneut bewertet.
+
+## Umsetzungsumfang und Reihenfolge fuer Phase 1
+
+Die Umsetzung erfolgt in einem ersten vertikalen, datengetriebenen Schnitt in
+folgender Reihenfolge:
+
+1. Der Cargo-Workspace und die minimalen Crate-Grenzen werden eingerichtet.
+2. `world_core` liefert IDs, Seed, Tageszeit, Tick, Koordinaten, Regionen und
+   generische Fehler fuer die eigenen Grundtypen.
+3. `world_data` laedt das `core-mod`, validiert dessen Daten und stellt die
+   Definitionen fuer Welt, Rassen und Geografie bereit.
+4. `worldgen` erzeugt daraus deterministisch die geografische Welt mit ihrer
+   Weltkonfiguration, Oberwelt und den initialen Regionen.
+5. Nach der geografischen Erzeugung wird ein eigener Initialisierungs-Command
+   fuer die Erstbevoelkerung verarbeitet. Dieser verteilt die Rassen in
+   Gruppen von jeweils 100 Individuen auf die Welt und erzeugt die zugehoerigen
+   `InitialRaceSpawn`-Events.
+6. `simulation` verarbeitet anschliessend den ersten Tages-Tick und fuehrt den
+   Weltzustand sowie das Event-Log deterministisch fort.
+7. Ein versionierter JSON-Snapshot wird gespeichert, geladen und in einem
+   semantischen Roundtrip-Test verglichen.
+8. `app` verbindet die Crates und stellt zunaechst nur eine Debug-Ausgabe fuer
+   Seed, Tick, Weltzustand und Events bereit. Eine ausgearbeitete
+   Macroquad-Oberflaeche ist nicht Teil dieses ersten Schnitts.
+
+Der Arbeitsname des Initialisierungs-Commands ist `InitializeRacePopulation`.
+Die genaue oeffentliche Command-API wird bei der Umsetzung von Phase 1
+festgelegt.
+
+## Offene Architekturfragen
+
+- Die genaue Aufteilung der Module innerhalb der Phase-1-Crates ist noch nicht
+  festgelegt.
+- Die konkreten Datenformate und Merge-Regeln des Mod-Vertrags werden mit der
+  ersten Mod-Ladeimplementierung weiter spezifiziert.
+- Der Zeitpunkt und die genaue Reihenfolge, in der weitere Welt-Daten nach der
+  geografischen Erzeugung befuellt werden, bleiben fuer die Umsetzung von
+  Phase 1 offen.
+
 ## Erfolgskriterien fuer den ersten Meilenstein
 
 Eine kleine Welt kann mit einem Seed erzeugt werden. Sie besitzt nachvollziehbare Regionen, Ressourcen, Akteure und mindestens eine Siedlung. Mehrere Simulationstakte erzeugen deterministische Events und veraendern den Zustand. Die Welt kann geladen, gespeichert und in einer einfachen Macroquad-Debugansicht betrachtet werden. Ein zweiter Lauf mit denselben Eingaben liefert dasselbe Ergebnis.
