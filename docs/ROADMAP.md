@@ -25,12 +25,12 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 
 #### B. Fachliche Kernbegriffe
 
-- [ ] Definition von Welt, Weltzustand und Weltkonfiguration festlegen
-- [ ] Zentrale Entitaeten und ihre Lebensdauer erfassen
-- [ ] Typisierte IDs fuer Welt, Region, Chunk, Entitaet und Event definieren
-- [ ] Beziehungen zwischen Entitaeten als eigenes Konzept beschreiben
-- [ ] Koordinaten- und Regionsmodell fuer die erste kleine Welt festlegen
-- [ ] Einheiten und Mengen definieren, zum Beispiel Nahrung, Gewicht und Entfernung
+- [x] Definition von Welt, Weltzustand und Weltkonfiguration festlegen
+- [x] Zentrale Entitaeten und ihre Lebensdauer erfassen
+- [x] Typisierte IDs fuer Welt, Region, Chunk, Entitaet und Event definieren
+- [x] Beziehungen zwischen Entitaeten als eigenes Konzept beschreiben
+- [x] Koordinaten- und Regionsmodell fuer die erste kleine Welt festlegen
+- [x] Einheiten und Mengen definieren, zum Beispiel Nahrung, Gewicht und Entfernung
 
 #### C. Zeit und Determinismus
 

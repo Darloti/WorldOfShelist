@@ -34,6 +34,11 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
 
 ## Arbeitsablauf
 
+0. Dokumentationen duerfen bei klaren Ergebnissen direkt aktualisiert und
+   erledigte Checklistenpunkte ohne weitere Genehmigung abgehakt werden. Vor
+   dem Anlegen oder Veraendern von Code beziehungsweise Content nachfragen,
+   ob die Aenderung tatsaechlich erfolgen soll. Ohne ausdrueckliche Zustimmung
+   keinen Code und keinen Content anlegen oder aendern.
 1. Vor einer Aenderung relevante Dokumentation und bestehende Module lesen.
 2. Die kleinste fachlich vollstaendige Aenderung umsetzen.
 3. Neue Regeln zuerst in reinen Rust-Tests pruefen; Macroquad nur fuer Integrations- oder Darstellungstests verwenden.
