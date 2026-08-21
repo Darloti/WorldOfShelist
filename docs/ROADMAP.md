@@ -87,16 +87,16 @@ sein Teil-Ergebnis reproduzierbar geprueft wurde.
 
 #### A. Workspace und Crate-Grenzen
 
-- [ ] Cargo-Workspace einrichten
-- [ ] Crate `world_core` im Workspace registrieren
-- [ ] Crate `world_data` im Workspace registrieren
-- [ ] Crate `worldgen` im Workspace registrieren
-- [ ] Crate `simulation` im Workspace registrieren
-- [ ] Crate `app` im Workspace registrieren
-- [ ] Abhaengigkeitsrichtung von `world_core` nach oben dokumentieren
-- [ ] Rueckverweise auf hoehere Schichten verhindern
-- [ ] Minimalen oeffentlichen Einstieg fuer jedes Crate einrichten
-- [ ] Kompilierbares Testziel fuer jedes Crate einrichten
+- [X] Cargo-Workspace einrichten
+- [X] Crate `world_core` im Workspace registrieren
+- [X] Crate `world_data` im Workspace registrieren
+- [X] Crate `worldgen` im Workspace registrieren
+- [X] Crate `simulation` im Workspace registrieren
+- [X] Crate `app` im Workspace registrieren
+- [X] Abhaengigkeitsrichtung von `world_core` nach oben dokumentieren
+- [X] Rueckverweise auf hoehere Schichten verhindern
+- [X] Minimalen oeffentlichen Einstieg fuer jedes Crate einrichten
+- [X] Kompilierbares Testziel fuer jedes Crate einrichten
 
 **Pruefbares Teil-Ergebnis:** `cargo check --workspace` laeuft erfolgreich; die
 Abhaengigkeiten entsprechen der dokumentierten Richtung und der Kern laedt

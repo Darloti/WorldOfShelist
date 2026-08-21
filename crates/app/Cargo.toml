@@ -1,0 +1,8 @@
+[package]
+name = "app"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+simulation = { version = "0.1.0", path = "../simulation" }
+worldgen = { version = "0.1.0", path = "../worldgen" }

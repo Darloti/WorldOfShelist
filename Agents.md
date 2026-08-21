@@ -39,6 +39,13 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
    dem Anlegen oder Veraendern von Code beziehungsweise Content nachfragen,
    ob die Aenderung tatsaechlich erfolgen soll. Ohne ausdrueckliche Zustimmung
    keinen Code und keinen Content anlegen oder aendern.
+   Wenn der Nutzer darum bittet, durch die Phasenabschnitte gefuehrt zu
+   werden, erfolgt die Begleitung in kleinen, einzeln erklaerten Schritten
+   statt als umfangreiche Aufgabenliste. Jeder Schritt wird mit einer
+   einfachen Begruendung versehen, warum er sinnvoll ist. Bei Rust-Code
+   werden die relevanten Teile ausfuehrlich erklaert, insbesondere was sie
+   tun und warum sie in Rust so umgesetzt sind. Die Erklaerungstiefe kann
+   spaeter im Dialog gemeinsam verringert werden.
 1. Vor einer Aenderung relevante Dokumentation und bestehende Module lesen.
 2. ToDo- und Checklistenpunkte duerfen erst abgehakt werden, wenn sie wirklich
    vollstaendig abgeschlossen, fachlich geprueft und falls erforderlich

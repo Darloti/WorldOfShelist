@@ -1,0 +1,7 @@
+[package]
+name = "world_data"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+world_core = { version = "0.1.0", path = "../world_core" }
