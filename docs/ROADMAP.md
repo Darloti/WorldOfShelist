@@ -11,7 +11,9 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
   Wachstums- oder Stabilitaetsschwelle aufgeschoben werden.
 - Zeitmodell, ID-Strategie, Koordinatenmodell und Persistenzversion definieren.
 
-**Exit-Kriterium:** Ein minimaler Kern kann einen Seed und einen Tick-Typ darstellen und wird durch automatisierte Tests abgesichert.
+**Exit-Kriterium:** Die fachlichen und technischen Grundlagen fuer den
+Minimal-Kern sind dokumentiert, widerspruchsfrei entschieden und als
+Umsetzungsvertrag fuer Phase 1 abgrenzbar.
 
 ### Phase-0-Checkliste
 
@@ -57,35 +59,22 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 - [x] Save-Struktur mit Formatversion, Seed, Zeit und Weltzustand skizzieren
 - [x] Strategie fuer Save-Migrationen und inkompatible Daten festlegen
 - [x] Entscheidung treffen, welche Events dauerhaft gespeichert werden
-- [x] Minimalen Serialize-/Deserialize-Test vorbereiten
+- [x] Anforderungen fuer den minimalen Serialize-/Deserialize-Test festlegen
 
 #### F. Qualitaet und Beobachtbarkeit
 
-- [ ] Kerninvarianten der Welt als Testfaelle formulieren
-- [ ] Determinismus-Test mit identischen Eingaben erstellen
-- [ ] Tick-Fortschritts- und Grenzfalltests erstellen
-- [ ] Test fuer ungueltige Konfiguration oder Daten erstellen
-- [ ] Debug-Ausgabe fuer Seed, Tick und erzeugte Events definieren
-- [ ] Fehlerdarstellung fuer Entwickler und spaetere Logs festlegen
+- [x] Kerninvarianten der Welt als Testfaelle formulieren
+- [x] Determinismus-Test mit identischen Eingaben spezifizieren
+- [x] Tick-Fortschritts- und Grenzfalltests definieren
+- [x] Testfall fuer ungueltige Konfiguration oder Daten definieren
+- [x] Debug-Ausgabe fuer Seed, Tick und erzeugte Events definieren
+- [x] Fehlerdarstellung fuer Entwickler und spaetere Logs festlegen
 
-#### G. Implementierung des Minimal-Kerns
+#### G. Abschluss von Phase 0
 
-- [ ] `WorldSeed` implementieren
-- [ ] `Tick` und grundlegendes Zeitmodell implementieren
-- [ ] erste typisierte IDs implementieren
-- [ ] minimale `World`- und `WorldConfig`-Strukturen implementieren
-- [ ] deterministischen RNG-Wrapper implementieren
-- [ ] minimale Event- und Command-Typen implementieren
-- [ ] ersten Orchestrator mit einem kontrollierten Tick implementieren
-- [ ] Tests fuer alle bisher festgelegten Invarianten implementieren
-
-#### H. Abschluss von Phase 0
-
-- [ ] `cargo fmt --check` erfolgreich ausfuehren
-- [ ] `cargo check` erfolgreich ausfuehren
-- [ ] `cargo test` erfolgreich ausfuehren
 - [ ] Architekturentscheidungen und offene Fragen dokumentieren
-- [ ] Phase-0-Exit-Kriterium anhand eines kleinen Testfalls nachweisen
+- [ ] Phase-0-Dokumentation auf Widersprueche und fehlende Entscheidungen pruefen
+- [ ] Umsetzungsumfang und Reihenfolge fuer Phase 1 festlegen
 - [ ] Entscheidung fuer Phase 1: Weltkern erweitern oder zuerst Workspace aufteilen
 
 ## Phase 1: Deterministischer Weltkern

@@ -44,6 +44,9 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
    vollstaendig abgeschlossen, fachlich geprueft und falls erforderlich
    dokumentiert sind. Teilfortschritte bleiben offen und werden als solche
    benannt.
+   Wenn der Nutzer nach den ToDos einer Phase fragt, sind ausschliesslich die
+   ToDos dieser Phase aus der Roadmap woertlich aufzulisten; keine Aufteilung,
+   Konkretisierung oder sonstige Eigeninterpretation ergaenzen.
 3. Die kleinste fachlich vollstaendige Aenderung umsetzen.
 4. Neue Regeln zuerst in reinen Rust-Tests pruefen; Macroquad nur fuer Integrations- oder Darstellungstests verwenden.
 5. Bei jeder Simulationserweiterung Seed, Tick, erzeugte Events und relevante Zustandsaenderungen sichtbar machen.

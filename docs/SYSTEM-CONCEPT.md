@@ -470,6 +470,50 @@ Schritts angewendet. Events erhalten neben ihrem Tick-Kontext einen exakten
 Zeitpunkt in der Weltzeit; eine stabile Reihenfolge fuer Events mit gleicher
 Weltzeit wird spaeter als Teil des Orchestrators festgelegt. Zeit wird je nach
 Kontext in Jahren, Monaten, Tagen, Stunden, Minuten und Sekunden dargestellt.
+#### Phase-0-Spezifikation der Tick-Fortschritts- und Grenzfalltests
+
+Die Tests decken den Minimal-Kern, die Welterzeugung und alle vorgesehenen
+Simulationskontexte ab. Fuer jeden Kontext wird die jeweils fachlich gueltige
+Tick-Dauer verwendet; es gibt keine einheitliche Tick-Dauer fuer alle
+Simulationsebenen.
+
+Die Fortschrittstests decken alle vorgesehenen Operationen ab:
+
+- normaler Fortschritt um einen Tick
+- Fortschritt um mehrere Ticks
+- Fortschritt bis zu einer Zielzeit
+- Pause
+- Fortsetzen
+- Einzelschritt
+- Beschleunigung und Verlangsamung ueber die vorgesehenen Geschwindigkeiten
+- Fortschritt in jedem vorgesehenen Simulationskontext
+
+Die Grenzfalltests decken mindestens folgende Situationen ab:
+
+- Weltzeit und Fortschritt vor dem ersten Tick
+- Tick `0`
+- ein einzelner Tick
+- mehrere Ticks
+- sehr grosse Schrittanzahlen
+- die groesste darstellbare Weltzeit
+- Zeit- und Tick-Ueberlauf
+- negative oder anderweitig ungueltige Fortschrittswerte
+- Fortschritt waehrend einer Pause
+- Einzelschritt waehrend einer Pause
+- Fortsetzen nach einer Pause
+- wiederholtes Pausieren und Fortsetzen
+- Fortschritt bis zu einer bereits erreichten Zielzeit
+- Fortschritt bis zu einer ungueltigen oder nicht erreichbaren Zielzeit
+- Wechsel des Simulationskontexts an einer Tick-Grenze
+
+Ein ungueltiger Fortschritts-Command wird mit einem stabilen Fehler abgelehnt.
+Die gesamte angeforderte Zustandsaenderung wird atomar zurueckgerollt; Weltzeit,
+Weltzustand und historische Events bleiben unveraendert. Ein Fortschritt wird
+nicht teilweise ausgefuehrt. Nach einer Ablehnung darf ein spaeterer,
+unabhaengig gueltiger Command die Simulation fortsetzen. Die Ablehnung wird
+mit ihrem Fehlercode im Debug-Protokoll erfasst, erzeugt aber kein historisches
+Event.
+
 ### Einheiten und Mengen
 
 Mengen werden intern als nichtnegative Ganzzahlen in ihrer kleinsten
@@ -546,9 +590,9 @@ fachlich eindeutig ableitbare oder optionale Werte duerfen definierte
 Defaults verwendet werden. Fehlen Pflichtdaten ohne sicheren Default, wird
 die Migration mit einem verstaendlichen Fehler abgebrochen.
 
-Unbekannte zusaetzliche Felder werden beim Laden ignoriert und nicht in den
-migrierten neuen Save uebernommen. Dadurch koennen neuere Daten nicht
-unbemerkt in ein aelteres oder anderes Datenmodell weitergetragen werden.
+Unbekannte zusaetzliche Felder werden beim Laden als Fehler abgelehnt. Dadurch
+werden Tippfehler und nicht unterstuetzte Daten nicht stillschweigend ignoriert
+und koennen die Reproduzierbarkeit nicht unbemerkt veraendern.
 
 Als inkompatibel gelten insbesondere geaenderte Datentypen ohne eindeutige
 Umwandlung, entfernte Pflichtfelder ohne sinnvollen Ersatz, geaenderte ID- oder
@@ -580,9 +624,8 @@ Zustandsmodelle oder der Simulationslogik werden. Formatversionen werden
 explizit mitgefuehrt.
 
 Geladene Daten werden gegen ein definiertes Schema validiert. Unbekannte
-Felder erzeugen beim Laden eine Warnung, sofern die Daten ansonsten gueltig
-sind. Fehlende Pflichtfelder, ungueltige Typen, ungueltige Werte und
-inkompatible Formatversionen werden dagegen als Ladefehler behandelt.
+Felder, fehlende Pflichtfelder, ungueltige Typen, ungueltige Werte und
+inkompatible Formatversionen werden als Ladefehler behandelt.
 
 Ganzzahlen, Seeds und typisierte IDs muessen in JSON und in spaeteren
 Alternativformaten ohne Praezisionsverlust abgebildet werden. Debug- und
@@ -591,6 +634,40 @@ vorgegeben; ihre Ablage und Erzeugung bleibt Teil der jeweiligen Test- oder
 Werkzeugstruktur.
 
 ### Schema, Defaults und Validierung
+
+#### Phase-0-Spezifikation ungueltiger Konfiguration und Daten
+
+Der Validierungstest umfasst alle extern geladenen oder persistierten Daten:
+
+- `WorldConfig` und `WorldSeed`
+- Weltgroesse und Ausdehnung
+- Generator-Version
+- Mod-IDs, Mod-Versionen und Datenvertraege
+- Definitionen
+- Save-Struktur und Formatversion
+- Runtime-ID-Woerterbuch
+- serialisierte Commands und Events, soweit sie geladen werden
+
+Der Test behandelt mindestens fehlende Pflichtfelder, leere oder formal
+ungueltige IDs, ungueltige oder inkompatible Versionen, widerspruechliche
+Werte, ungueltige Wertebereiche, fehlende Mod-Abhaengigkeiten, doppelte IDs,
+ungueltige Referenzen, ungueltige Seeds sowie beschaedigte oder unvollstaendige
+Daten. Unbekannte Felder werden strikt abgelehnt.
+
+Eine ungueltige Konfiguration oder ein ungueltiger Datensatz wird vollstaendig
+abgelehnt. Vor der Welterzeugung wird keine Welt erstellt. Bei einem bereits
+bestehenden Weltzustand bleibt dieser durch atomaren Rollback unveraendert;
+Weltzeit, Weltzustand und historische Events werden nicht teilweise geaendert.
+Die Ablehnung verwendet einen stabilen Fehlercode und benennt den betroffenen
+Datentyp sowie, sofern vorhanden, den Feldpfad. Sie erzeugt kein historisches
+Event.
+
+Die Validierung erfolgt vor Welterzeugung und Simulation. Aeltere
+unterstuetzte Versionen werden nur ueber ausdruecklich definierte,
+deterministische Migrationen akzeptiert. Unbekannte oder inkompatible
+Versionen werden abgelehnt. Eine Migration aendert die Quelldaten nicht,
+sondern erzeugt eine neue validierte Version mit Sicherung der Quelle.
+
 ### Namensgeneratoren und Sprachdaten
 ### Tags, Kategorien und Abhaengigkeiten
 ### Modding und Erweiterungspunkte
@@ -701,6 +778,29 @@ deterministischen Reihenfolge. Die ersten Eventtypen sind `CreatureSlain`,
 `KingdomFounded` und `HistoricalFigureBorn`; ihre ereignisspezifischen Daten
 werden gemeinsam mit dem jeweiligen Eventtyp definiert. Ein reiner
 Command-Eingang, ein Tick oder eine Ablehnung ist kein historisches Event.
+### Kerninvarianten des Phase-0-Kerns
+
+Die folgenden Invarianten begrenzen den ersten testbaren Kernumfang. Sie gelten
+unabhaengig von spaeteren Regeln fuer Population, Ressourcen, Biome oder Kampf:
+
+- Eine `WorldConfig` enthaelt mindestens einen gueltigen `WorldSeed`.
+- Ein `WorldSeed` bleibt fuer die Lebensdauer einer Welt unveraendert.
+- Ein `Tick` ist gueltig darstellbar und kann nicht unbeabsichtigt rueckwaerts
+  laufen.
+- Ein normaler Tick-Fortschritt erhoeht die Simulationszeit genau einmal.
+- Eine pausierte Simulation veraendert ihren Weltzustand nicht.
+- Ein Einzelschritt verarbeitet genau einen kontrollierten Tick.
+- Typisierte IDs sind nur in ihrem vorgesehenen fachlichen Kontext verwendbar.
+- IDs sind innerhalb ihres jeweiligen Gueltigkeitsbereichs eindeutig.
+- Events besitzen immer eine eindeutige Event-ID und einen gueltigen Tick.
+- Events enthalten Ursache und betroffene Entitaeten, sofern fachlich
+  erforderlich.
+- Referenzen auf Entitaeten und Beziehungen zeigen nur auf gueltige oder
+  ausdruecklich entfernte Objekte.
+- Ein ungueltiger Command veraendert den Weltzustand nicht.
+- Bei gleichem Seed, gleicher Konfiguration und gleichen Eingaben entstehen
+  derselbe Zustand und dieselben Events.
+
 ### Event-Abonnenten und Reaktionen
 ### Determinismus und Replay
 
@@ -717,6 +817,38 @@ Simulation nicht zulaessig. Abgelehnte Commands und Fehler muessen mit
 demselben fachlichen Fehlercode und in derselben Reihenfolge reproduzierbar
 sein.
 
+#### Phase-0-Spezifikation des Determinismus-Tests
+
+Der Determinismus-Test deckt den vollstaendigen fuer den jeweiligen Lauf
+relevanten Umfang ab: Minimal-Kern, Welterzeugung und die vorgesehenen
+Simulationskontexte. In zwei identischen Testlaeufen bleiben alle folgenden
+Eingaben unveraendert:
+
+- vollstaendige Weltkonfiguration
+- Welt-Seed
+- Mod-Versionen und Datenvertraege
+- Commands
+- Eingabezeitpunkte
+- Eingabereihenfolge
+
+Die Ergebnisse werden semantisch verglichen. Der Vergleich umfasst:
+
+- den fachlich relevanten Weltzustand
+- stabile IDs
+- historische Events
+- Event-Reihenfolge
+- abgelehnte Commands und Fehlercodes
+- relevante Debug-Informationen zu Zufallsentscheidungen
+
+Der Test wird in drei Umfaengen spezifiziert:
+
+1. Welterzeugung ohne anschliessenden Tick-Fortschritt
+2. Welterzeugung und anschliessend 100 Ticks
+3. Welterzeugung und anschliessend 10.000 Ticks
+
+Jeder Umfang muss bei identischen Eingaben semantisch identische Ergebnisse
+erzeugen.
+
 Ein Determinismus-Test zaehlt Fortschrittsschritte des jeweiligen
 Simulationskontexts und nicht eine globale, einheitliche Tick-Dauer. Ein
 Siedlungsschritt entspricht einer Ingame-Stunde, ein Koenigreichsschritt einem
@@ -727,7 +859,7 @@ muss die Weltzeit der Summe aller verarbeiteten Schritt- beziehungsweise
 Aktionsdauern entsprechen.
 
 Der erste Testumfang umfasst mindestens 100 Fortschrittsschritte je Kontext
-sowie einen Langzeittest mit 1.000 Fortschrittsschritten. Zusaetzlich wird ein
+sowie einen Langzeittest mit 10.000 Fortschrittsschritten. Zusaetzlich wird ein
 Save nach einer definierten Schrittzahl geladen und mit einem ununterbrochenen
 Lauf verglichen. Groessere und kleinere Schrittweiten duerfen nur dann als
 fachlich gleichwertig gelten, wenn im groesseren Schritt keine relevanten
@@ -874,6 +1006,49 @@ dokumentiert.
 ### Darstellung von Entitaeten und Ereignissen
 ### UI, Panels und Informationshierarchie
 ### Debug- und Entwickleransichten
+
+#### Phase-0-Spezifikation der Debug-Ausgabe
+
+Die Debug-Ausgabe wird sowohl als menschenlesbarer Text als auch als
+strukturiertes JSON definiert. Beide Darstellungen verwenden dieselben
+fachlichen Daten und dieselbe deterministische Reihenfolge. Die Ausgabe kann
+an mehrere Ziele geleitet werden: mindestens Konsole und Datei. Die
+Konsolenausgabe ist unabhaengig von der Dateiausgabe abschaltbar.
+
+Die Ausgabemenge wird ueber ein konfigurierbares Mindest-Loglevel gesteuert.
+Die Level sind `error`, `warn`, `info`, `debug` und `trace`. Ein Eintrag wird
+ausgegeben, wenn sein Level mindestens so hoch ist wie das fuer sein Ziel
+konfigurierte Mindestlevel. Konsole und Datei koennen jeweils eigene
+Mindestlevel verwenden. Der Default ist `info` fuer beide Ziele; die Konsole
+kann zusaetzlich unabhaengig deaktiviert werden. Dadurch sind Fehler und
+Warnungen ohne weitere Konfiguration sichtbar, waehrend technische Debug- und
+Trace-Daten standardmaessig ausgeblendet bleiben.
+
+Ein Debug-Eintrag enthaelt nur stabile und fuer die Reproduktion relevante
+Daten. Systemzeit, zufaellige technische IDs und andere nichtdeterministische
+Metadaten werden nicht als Vergleichsdaten verwendet. Die Feldnamen und die
+Reihenfolge der Eintraege bleiben fuer semantische Vergleiche stabil.
+
+Ein Eintrag zur Welterzeugung oder zu einer Zufallsentscheidung enthaelt alle
+relevanten Seed-Daten, insbesondere den Welt-Seed, seine Eingabeform, die
+normalisierte Darstellung, die RNG-Algorithmusversion sowie verwendeten
+RNG-Stream und RNG-Kontext, sofern diese fuer die Entscheidung relevant sind.
+
+Ein Tick-Eintrag enthaelt alle relevanten Tick-Daten: Simulationskontext,
+Tick-Nummer, Weltzeit vor und nach dem Tick, Tick-Dauer, verarbeitete Commands,
+Eingabezeitpunkte und Eingabereihenfolge sowie die ausgefuehrte
+Systemreihenfolge, soweit diese Daten vorhanden sind.
+
+Ein Event-Eintrag enthaelt alle relevanten Event-Daten: Event-ID, Eventtyp,
+Tick-Kontext, exakten Zeitpunkt, Ursache, betroffene Entitaeten,
+ereignisspezifische Daten und die stabile Reihenfolge innerhalb des Ticks.
+
+Normale Tick-Eintraege werden nur ausgegeben, wenn der Tick mindestens ein
+historisches Event erzeugt. Fehler und abgelehnte Commands werden unabhaengig
+von erzeugten Events sofort ausgegeben. Sie enthalten mindestens Fehlercode,
+Fehlerart, betroffenen Datentyp oder Command, Feldpfad beziehungsweise
+Entitaetsreferenz sowie Seed- und Tick-Kontext, sofern vorhanden.
+
 ### LOD, Culling und Streaming
 ### Animationen, Partikel und Effekte
 ### Audio und Musik
