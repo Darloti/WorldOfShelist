@@ -52,12 +52,12 @@ Die Roadmap ist nach validierbaren Ergebnissen geordnet, nicht nach rein technis
 
 #### E. Daten und Persistenz
 
-- [ ] Trennung zwischen Definitionen, Instanzen und Laufzeitstatus festlegen
-- [ ] Erstes Datenformat fuer Debug- und Testdaten auswaehlen
-- [ ] Save-Struktur mit Formatversion, Seed, Zeit und Weltzustand skizzieren
-- [ ] Strategie fuer Save-Migrationen und inkompatible Daten festlegen
-- [ ] Entscheidung treffen, welche Events dauerhaft gespeichert werden
-- [ ] Minimalen Serialize-/Deserialize-Test vorbereiten
+- [x] Trennung zwischen Definitionen, Instanzen und Laufzeitstatus festlegen
+- [x] Erstes Datenformat fuer Debug- und Testdaten auswaehlen
+- [x] Save-Struktur mit Formatversion, Seed, Zeit und Weltzustand skizzieren
+- [x] Strategie fuer Save-Migrationen und inkompatible Daten festlegen
+- [x] Entscheidung treffen, welche Events dauerhaft gespeichert werden
+- [x] Minimalen Serialize-/Deserialize-Test vorbereiten
 
 #### F. Qualitaet und Beobachtbarkeit
 

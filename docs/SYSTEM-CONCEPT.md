@@ -501,11 +501,95 @@ optionale datengetriebene Eigenschaften und Prozesse ergaenzt werden, falls
 dafuer ein konkreter fachlicher Bedarf entsteht.
 
 ### Definitionen, Templates und Instanzen
+
+Definitionen beschreiben allgemeine fachliche Typen und Regeln und sind keine
+konkreten Weltentitaeten. Beispiele fuer die erste Phase sind Biome,
+Ressourcenarten, Spezies und Ortstypen. Sie werden ueber versionierte
+Datenquellen beziehungsweise das `core-mod` geladen.
+
+Instanzen sind konkrete Auspraegungen dieser Definitionen in einer bestimmten
+Welt. Dazu gehoeren beispielsweise eine konkrete Welt, Region,
+Ressourcenlagerstaette, Siedlung oder ein Point of Interest. Instanzen besitzen
+stabile IDs und werden im Save gespeichert, sofern sie fuer den Weltzustand,
+die Geschichte oder eine spaetere Referenz relevant sind.
+
+Der Laufzeitstatus umfasst alle veraenderlichen Werte und den aktuellen
+Simulationsfortschritt. Dazu gehoeren insbesondere die aktuelle Weltzeit,
+aktuelle Mengen, aktive Prozesse, Lebenszyklusstatus und laufende
+Beziehungen. Der Laufzeitstatus wird getrennt von Definitionen und der
+unveraenderlichen Identitaet einer Instanz behandelt und im Save gespeichert.
+
+Unveraenderte Details, die aus Seed, Weltkonfiguration und Erzeugungskontext
+deterministisch rekonstruiert werden koennen, muessen nicht dauerhaft
+gespeichert werden. Sobald solche Details relevant veraendert oder historisch
+referenziert wurden, ist der persistierte Zustand massgeblich.
+
+Die Trennung gilt zunaechst als fachlicher Datenvertrag und wird bei der
+Implementierung des Minimal-Kerns in Rust-Strukturen abgebildet. Definitionen
+werden dabei nicht als Instanzen dupliziert; Instanzen referenzieren die
+zugehoerigen Definitionen.
+
 ### Versionierung und Migration
+
+Jeder Save besitzt eine explizite technische Formatversion im
+`manifest.json`. Alte Saves werden beim Laden grundsaetzlich automatisch auf
+die aktuelle unterstuetzte Version migriert. Migrationen funktionieren nur
+vorwaerts, also von einer aelteren auf eine neuere Formatversion.
+
+Eine Migration veraendert den urspruenglichen Save nicht. Sie erstellt eine
+neue Save-Kopie und legt vor der Migration zusaetzlich eine Sicherung des
+urspruenglichen Saves an. Der urspruengliche Save bleibt dadurch als
+Rueckfalloption erhalten.
+
+Fehlen Daten, entscheidet die jeweilige Datenart ueber das Vorgehen. Fuer
+fachlich eindeutig ableitbare oder optionale Werte duerfen definierte
+Defaults verwendet werden. Fehlen Pflichtdaten ohne sicheren Default, wird
+die Migration mit einem verstaendlichen Fehler abgebrochen.
+
+Unbekannte zusaetzliche Felder werden beim Laden ignoriert und nicht in den
+migrierten neuen Save uebernommen. Dadurch koennen neuere Daten nicht
+unbemerkt in ein aelteres oder anderes Datenmodell weitergetragen werden.
+
+Als inkompatibel gelten insbesondere geaenderte Datentypen ohne eindeutige
+Umwandlung, entfernte Pflichtfelder ohne sinnvollen Ersatz, geaenderte ID- oder
+Referenzvertraege, nicht unterstuetzte Save-Formatversionen sowie fehlende
+oder inkompatible Mod-Daten. In solchen Faellen wird ein verstaendlicher
+Fehler ausgegeben. Sofern der Zustand noch sicher lesbar ist, darf der Save
+zusaetzlich schreibgeschuetzt geladen werden; eine Simulation oder ein
+Ueberschreiben ist dann nicht erlaubt.
+
+Save-Migrationen behandeln das technische Save-Format und die gespeicherte
+Datenstruktur. Mod-Versionen und deren Datenvertraege werden separat geprueft
+und nicht durch eine allgemeine Save-Migration repariert. Nicht mehr direkt
+unterstuetzte Saves sollen spaeter ueber ein separates Import- oder
+Upgrade-Werkzeug migriert werden koennen.
 
 ## 2. Datengetriebene Inhalte
 
 ### Datenquellen und Dateiformate
+
+Das erste Datenformat ist JSON. Es wird wegen seiner Menschenlesbarkeit fuer
+Debug-Daten, Testdaten und die ersten Save-Prototypen verwendet. Die
+Serialisierung und Deserialisierung erfolgt ueber `serde`, damit die fachlichen
+Rust-Strukturen nicht an ein einzelnes Dateiformat gebunden werden.
+
+Der Datenvertrag wird so gestaltet, dass spaeter ein binaeres und
+komprimierbares Format ergaenzt oder fuer Produktions-Saves verwendet werden
+kann. Die Wahl des Speicherformats darf daher nicht Teil der fachlichen
+Zustandsmodelle oder der Simulationslogik werden. Formatversionen werden
+explizit mitgefuehrt.
+
+Geladene Daten werden gegen ein definiertes Schema validiert. Unbekannte
+Felder erzeugen beim Laden eine Warnung, sofern die Daten ansonsten gueltig
+sind. Fehlende Pflichtfelder, ungueltige Typen, ungueltige Werte und
+inkompatible Formatversionen werden dagegen als Ladefehler behandelt.
+
+Ganzzahlen, Seeds und typisierte IDs muessen in JSON und in spaeteren
+Alternativformaten ohne Praezisionsverlust abgebildet werden. Debug- und
+Testdaten werden nicht als eigene versionierte Dateien im Repository
+vorgegeben; ihre Ablage und Erzeugung bleibt Teil der jeweiligen Test- oder
+Werkzeugstruktur.
+
 ### Schema, Defaults und Validierung
 ### Namensgeneratoren und Sprachdaten
 ### Tags, Kategorien und Abhaengigkeiten
@@ -797,8 +881,96 @@ dokumentiert.
 
 ## 15. Persistenz und Werkzeuge
 
+### Save-Struktur
+
+Ein Save ist ein eigener Ordner und keine einzelne Datei. Die erste
+Darstellung ist menschenlesbar und verwendet JSON. Das Save-Layout wird von
+der konkreten Serialisierung getrennt, damit spaeter binaere und
+komprimierbare Speicherformate verwendet werden koennen, ohne die fachliche
+Aufteilung des Weltzustands zu aendern.
+
+Im obersten Save-Ordner liegt ein `manifest.json`. Das Manifest beschreibt
+mindestens die Save-Formatversion, die Weltidentitaet, den Seed, die aktuelle
+Zeit, verwendete Versionen und die enthaltenen Datenbereiche. Es erlaubt
+Werkzeugen, die Dateien eines Saves zu erkennen, ohne die gesamte Welt laden
+zu muessen.
+
+Die Daten werden nach fachlicher Zustaendigkeit, Groesse, Aenderungshaeufigkeit
+und Zugriffsmuster aufgeteilt. Fuer den ersten Entwurf sind unter anderem
+folgende Bereiche vorgesehen:
+
+- `world`: Geografie, Regionen und Regionsressourcen einschliesslich
+  unterirdischer beziehungsweise anderer geografischer Daten
+- `aggregates`: aggregierte Daten wie Bevoelkerungszahlen, regionale
+  Ressourcenmengen und Tierbestaende
+- `entities`: aktuell instanzierte Entitaeten
+- `player`: spielerbezogene Daten, sofern der Spielstand einen Spieler besitzt
+- `settlements`: Zustaende und Metadaten von Siedlungen
+- `civilisations`: Zustaende und Metadaten von Zivilisationen
+- `maps`: fuer Darstellung und lokale Verarbeitung benoetigte Kartendaten von
+  Tiles bis zu relevanten Objekten
+
+Diese Liste ist nicht abschliessend. Weitere fachliche Bereiche wie Items,
+Fraktionen, Beziehungen, Prozesse, Definitionen oder Geschichte koennen bei
+sinnvoller fachlicher oder technischer Abgrenzung eigene Dateien oder
+Unterordner erhalten. Die Save-Struktur wird deshalb erweiterbar entworfen;
+Punkt 3.E legt keine vollstaendige spaetere Dateiliste fest.
+
+Events werden in einem eigenen `events`-Ordner gespeichert. Die Event-Historie
+wird in aufeinanderfolgenden Dateien segmentiert. Die maximale Anzahl von
+Events je Datei ist konfigurierbar, zum Beispiel 1.000 oder 10.000. Die
+Segmentierung darf weder Reihenfolge noch Vollstaendigkeit der Event-Historie
+veraendern.
+
+Kartendaten und Entitaeten werden getrennt gespeichert. Entitaeten werden
+nicht in die Kartendateien eingebettet, sondern ueber ihre IDs und
+Positionsdaten mit den Karten verknuepft. Alle Save-Bereiche muessen fuer
+Werkzeuge und spaetere Suchfunktionen grundsaetzlich durchsuchbar bleiben.
+Konkrete Suchkriterien werden je Fachbereich spaeter festgelegt. Fuer
+Entitaeten muessen mindestens die Entity-ID und Koordinaten als Suchkriterien
+unterstuetzt werden; Kombinationen wie Entity-ID und Koordinate muessen
+moeglich sein. Ob dafuer sortierte Daten, Indexdateien oder ein separates
+Suchverzeichnis verwendet werden, bleibt eine Implementierungsentscheidung.
+
 ### Save-Snapshots und Save-Slots
+
+### Minimaler Serialize-/Deserialize-Test
+
+Fuer Phase 0 wird zunaechst nur der fachliche Umfang eines spaeter in 0.G
+umzusetzenden Roundtrip-Tests festgelegt. Der Test verwendet einen minimalen
+logischen Save mit `manifest`, Formatversion, Seed, Zeit, einem kleinen
+Weltzustand, mindestens einer konkreten Entity und mindestens einem
+historischen Event.
+
+Der minimale Test serialisiert diesen Save und deserialisiert ihn wieder. Der
+geladene Zustand muss semantisch identisch mit dem Ausgangszustand sein. Der
+Vergleich erfolgt nicht anhand byte-identischen JSON-Texts, sondern anhand
+seiner fachlichen Werte.
+
+Die Aufteilung in mehrere Save-Dateien und Event-Segmente, Tests fuer
+ungueltige Pflichtdaten sowie Tests fuer unbekannte Felder gehoeren nicht zum
+minimalen Roundtrip-Test. Sie werden spaeter in den Qualitaets- und
+Implementierungstests behandelt. Die konkreten Rust-Strukturen, Speicher- und
+Ladefunktionen werden erst in 0.G umgesetzt.
+
 ### Event-Log und Replay-Dateien
+
+Jedes fachliche Event ist ein historisches Ereignis und wird dauerhaft im Save
+gespeichert. Die Event-Historie ist vollstaendig und append-only. Ein Snapshot,
+Checkpoint oder Save-Ladevorgang darf historische Events weder ersetzen noch
+loeschen. Event-Dateien duerfen zur Platzersparnis komprimiert oder in ein
+Archiv verschoben werden; eine Bereinigung oder Entfernung historischer Events
+ist nicht zulaessig.
+
+Runtime-interne Vorgaenge, technische Debug-Meldungen, Warnungen und
+abgelehnte Commands sind keine historischen Events. Sie werden getrennt im
+Debug- beziehungsweise Diagnoseprotokoll behandelt und gehoeren nicht in die
+dauerhafte fachliche Event-Historie.
+
+Gespeicherte fachliche Events enthalten ausreichend Daten, um sowohl Replay
+als auch History zu unterstuetzen. Die Segmentierung in mehrere Event-Dateien
+darf ihre Reihenfolge, Vollstaendigkeit und eindeutige Zuordnung nicht
+veraendern.
 ### Kompression, Checkpoints und Autosaves
 ### Save-Migration und Abwaertskompatibilitaet
 ### Import/Export und Debug-Dumps
