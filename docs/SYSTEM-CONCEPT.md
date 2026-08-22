@@ -433,16 +433,17 @@ umgebrochen; ausserhalb der rechteckigen Welt existiert keine Koordinate.
 
 ### Zeit, Kalender und Zeitskalen
 
-Die kanonische Weltzeit wird als nichtnegative Anzahl von Sekunden seit der
-Welterzeugung gefuehrt. Der Startzeitpunkt ist Tag 1, Monat 1, Jahr 1 bei
-Weltzeit `0`. Ein Tag hat 24 Stunden, eine Stunde 60 Minuten und eine Minute
-60 Sekunden.
+Die kanonische Weltzeit wird als nichtnegative Anzahl von Millisekunden seit
+der Welterzeugung gefuehrt. Der Startzeitpunkt ist Tag 1, Monat 1, Jahr 1 bei
+Weltzeit `0`. Eine Sekunde hat 1.000 Millisekunden. Ein Tag hat 24 Stunden,
+eine Stunde 60 Minuten und eine Minute 60 Sekunden.
 
 Der Kalender umfasst zehn normale Monate mit jeweils 20 Tagen sowie einen
 elften Sondermonat mit drei Tagen. Ein Jahr hat damit 203 Tage oder
-`17.539.200` Sekunden. Der Sondermonat ist als eigener Kalenderabschnitt
-erkennbar und kann spaeter besondere Gefahren, Spawnregeln und Events
-aktivieren. Diese Regeln gehoeren nicht zur grundlegenden Zeitrepraesentation.
+`17.539.200.000` Millisekunden. Der Sondermonat ist als eigener
+Kalenderabschnitt erkennbar und kann spaeter besondere Gefahren, Spawnregeln
+und Events aktivieren. Diese Regeln gehoeren nicht zur grundlegenden
+Zeitrepraesentation.
 
 Ein Simulations-Tick ist ein expliziter, kontrollierter Fortschrittsschritt,
 in dem die zustaendigen Systeme in definierter Reihenfolge ausgefuehrt werden.

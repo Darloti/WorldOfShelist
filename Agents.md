@@ -4,7 +4,7 @@
 
 Das Spiel World of Shelist ist ein datengetriebenes Fantasy-Simulationsspiel. Das technische Projekt und Cargo-Crate heissen `WorldOfShelist`. Zuerst entsteht eine vollstaendige, reproduzierbare und beobachtbare Welt-Simulation. Spielmodi wie Roguelike, Siedlungsbau, Koenigreich und History greifen spaeter auf dieselbe Welt und dieselben Simulationsregeln zu.
 
-Die verbindliche Projektdefinition steht in `docs/PROJECT-VISION.md`, die Etappen in `docs/ROADMAP.md` und das noch zu befuellende Systeminventar in `docs/SYSTEM-CONCEPT.md`.
+Die verbindliche Projektdefinition steht in `docs/PROJECT-VISION.md`. Die Roadmap besteht aus dem kurzen Index `docs/ROADMAP.md` und je einer Datei unter `docs/roadmap/`.
 
 ## Technische Leitplanken
 
@@ -34,11 +34,13 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
 
 ## Arbeitsablauf
 
-0. Dokumentationen duerfen bei klaren Ergebnissen direkt aktualisiert und
-   erledigte Checklistenpunkte ohne weitere Genehmigung abgehakt werden. Vor
-   dem Anlegen oder Veraendern von Code beziehungsweise Content nachfragen,
-   ob die Aenderung tatsaechlich erfolgen soll. Ohne ausdrueckliche Zustimmung
-   keinen Code und keinen Content anlegen oder aendern.
+0. Gespraeche ueber Regeln, Architektur, Datenvertraege oder andere fachliche
+   Entscheidungen beziehen sich zunaechst ausschliesslich auf die
+   Dokumentation dieser Entscheidung. Eine beschlossene Entscheidung darf in
+   den betroffenen Dokumenten festgehalten werden. Code oder Content darf nur
+   angelegt oder veraendert werden, wenn der Nutzer dies ausdruecklich und
+   konkret beauftragt; aus einem Gespraech oder einer fachlichen Entscheidung
+   darf keine Implementierung abgeleitet werden.
    Wenn der Nutzer darum bittet, durch die Phasenabschnitte gefuehrt zu
    werden, erfolgt die Begleitung in kleinen, einzeln erklaerten Schritten
    statt als umfangreiche Aufgabenliste. Jeder Schritt wird mit einer
@@ -46,19 +48,29 @@ Diese Namen sind Vorschlaege, keine Verpflichtung. Abhaengigkeiten sollen von ob
    werden die relevanten Teile ausfuehrlich erklaert, insbesondere was sie
    tun und warum sie in Rust so umgesetzt sind. Die Erklaerungstiefe kann
    spaeter im Dialog gemeinsam verringert werden.
-1. Vor einer Aenderung relevante Dokumentation und bestehende Module lesen.
+1. Kontext sparsam laden: Zuerst nur den Roadmap-Index lesen, falls die
+   zustaendige Phase noch nicht bekannt ist. Danach ausschliesslich die
+   benoetigte Phasendatei unter `docs/roadmap/` lesen. `PROJECT-VISION.md`,
+   `SYSTEM-CONCEPT.md` und andere Phasendateien nur oeffnen, wenn der konkrete
+   Task eine darin enthaltene Entscheidung oder Definition zwingend benoetigt.
+   Bestehende Module und weitere Dateien ebenfalls nur lesen, wenn sie fuer
+   die konkrete Aenderung erforderlich sind. Keine vollstaendigen Verzeichnis-,
+   Dokumentations- oder Codebestandsaufnahmen ohne konkreten Bedarf. Von
+   benoetigten grossen Dateien nur die relevanten Abschnitte lesen; keine
+   vorsorglichen Gesamtdateien in den Session-Kontext laden.
 2. ToDo- und Checklistenpunkte duerfen erst abgehakt werden, wenn sie wirklich
    vollstaendig abgeschlossen, fachlich geprueft und falls erforderlich
    dokumentiert sind. Teilfortschritte bleiben offen und werden als solche
    benannt.
-   Wenn der Nutzer nach den ToDos einer Phase fragt, sind ausschliesslich die
-   ToDos dieser Phase aus der Roadmap woertlich aufzulisten; keine Aufteilung,
+   Wenn der Nutzer nach den ToDos einer Phase fragt, ist ausschliesslich die
+   zugehoerige Phasendatei zu lesen und deren Inhalt woertlich aufzulisten;
+   keine Aufteilung,
    Konkretisierung oder sonstige Eigeninterpretation ergaenzen.
 3. Die kleinste fachlich vollstaendige Aenderung umsetzen.
 4. Neue Regeln zuerst in reinen Rust-Tests pruefen; Macroquad nur fuer Integrations- oder Darstellungstests verwenden.
 5. Bei jeder Simulationserweiterung Seed, Tick, erzeugte Events und relevante Zustandsaenderungen sichtbar machen.
 6. Dokumentation aktualisieren, wenn Architektur, Datenvertrag oder Roadmap betroffen sind.
-7. `cargo fmt --check`, `cargo check` und passende `cargo test` ausfuehren. Bei grafikbezogenen Aenderungen zusaetzlich manuell starten.
+7. `cargo fmt --check`, `cargo check` und passende `cargo test` ausfuehren. Bei grafikbezogenen Aenderungen zusaetzlich manuell starten. Wenn die zu pruefenden Aenderungen vom Nutzer stammen, diese Befehle nicht automatisch ausfuehren, sondern erst nach ausdruecklicher Aufforderung.
 8. Bei Auflistungen von Entscheidungen, Fragen oder ToDos nummerierte Punkte im
    Format `1.`, `2.`, `3.` verwenden, damit der Nutzer direkt auf einzelne
    Punkte Bezug nehmen kann.
