@@ -1,5 +1,7 @@
+mod coordinate;
 mod world_time;
 
+pub use coordinate::{Coordinate, CoordinateError};
 pub use world_time::{WorldTime, WorldTimeError};
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
