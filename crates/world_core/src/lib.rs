@@ -1,3 +1,7 @@
+mod world_time;
+
+pub use world_time::{WorldTime, WorldTimeError};
+
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct WorldId(u64);
 

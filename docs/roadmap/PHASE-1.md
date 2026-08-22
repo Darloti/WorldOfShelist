@@ -27,7 +27,7 @@ Phase 1 baut den ersten datengetriebenen, deterministischen Weltkern. Die Arbeit
 - [X] `EntityId` als typisierte ID einfuehren
 - [X] `EventId` als typisierte ID einfuehren
 - [X] `WorldSeed` modellieren
-- [ ] Weltzeit in Millisekunden mit einem Tages-Tick modellieren
+- [X] Weltzeit in Millisekunden mit einem Tages-Tick modellieren
 - [ ] Koordinatentyp definieren
 - [ ] Grundlegendes Regionenmodell definieren
 - [ ] Namespaced-ID-Format validieren
